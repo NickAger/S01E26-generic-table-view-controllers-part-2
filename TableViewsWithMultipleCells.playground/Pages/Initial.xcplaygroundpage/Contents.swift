@@ -1,6 +1,8 @@
 import UIKit
 import PlaygroundSupport
 
+// based on: https://talk.objc.io/episodes/S01E26-generic-table-view-controllers-part-2
+
 struct Album {
     var title: String
 }
@@ -63,11 +65,11 @@ final class GenericTableViewController<Item>: UITableView, UITableViewDataSource
         let item = itemForIndexPath(indexPath)
         let descriptor = cellDescriptor(item)
         if !reuseIdentifiers.contains(descriptor.reuseIdentifier) {
-            self.register(descriptor.cellClass, forCellReuseIdentifier: descriptor.reuseIdentifier)
+            register(descriptor.cellClass, forCellReuseIdentifier: descriptor.reuseIdentifier)
             reuseIdentifiers.insert(descriptor.reuseIdentifier)
         }
         
-        let cell = self.dequeueReusableCell(withIdentifier: descriptor.reuseIdentifier, for: indexPath)
+        let cell = dequeueReusableCell(withIdentifier: descriptor.reuseIdentifier, for: indexPath)
         descriptor.configure(cell)
         return cell
     }
