@@ -1,6 +1,11 @@
 import UIKit
 import PlaygroundSupport
 
+// from: https://github.com/weissi/swift-undefined
+public func undefined<T>(hint: String = "", file: StaticString = #file, line: UInt = #line) -> T {
+    let message = hint == "" ? "" : ": \(hint)"
+    fatalError("undefined \(T.self)\(message)", file:file, line:line)
+}
 
 struct Album {
     var title: String
@@ -24,7 +29,10 @@ struct CellDescriptor {
     }
 }
 
-final class ItemsViewController<Item>: UITableViewController {
+// cannot define delegates in extensions:
+// "@objc is not supported within extensions of generic classes" - https://bugs.swift.org/browse/SR-4173
+// so define delegate functions within the body of the class declaration
+final class GenericTableViewController<Item>: UITableView, UITableViewDataSource, UITableViewDelegate {
     var items: [Item] = []
     let cellDescriptor: (Item) -> CellDescriptor
     var didSelect: (Item) -> () = { _ in }
@@ -32,37 +40,44 @@ final class ItemsViewController<Item>: UITableViewController {
     
     init(items: [Item], cellDescriptor: @escaping (Item) -> CellDescriptor) {
         self.cellDescriptor = cellDescriptor
-        super.init(style: .plain)
+        super.init(frame: CGRect.zero, style: .plain)
         self.items = items
+        self.dataSource = self
+        self.delegate = self
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let item = items[indexPath.row]
-        didSelect(item)
+    // MARK: - UITableViewDataSource
+    @objc func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    @objc func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    @objc func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = items[indexPath.row]
         let descriptor = cellDescriptor(item)
         if !reuseIdentifiers.contains(descriptor.reuseIdentifier) {
-            tableView.register(descriptor.cellClass, forCellReuseIdentifier: descriptor.reuseIdentifier)
+            self.register(descriptor.cellClass, forCellReuseIdentifier: descriptor.reuseIdentifier)
             reuseIdentifiers.insert(descriptor.reuseIdentifier)
         }
-
-        let cell = tableView.dequeueReusableCell(withIdentifier: descriptor.reuseIdentifier, for: indexPath)
+        
+        let cell = self.dequeueReusableCell(withIdentifier: descriptor.reuseIdentifier, for: indexPath)
         descriptor.configure(cell)
         return cell
     }
+    
+    // MARK: - UITableViewDelegate
+    @objc func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = items[indexPath.row]
+        didSelect(item)
+    }
 }
-
 
 final class ArtistCell: UITableViewCell {
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
@@ -131,11 +146,18 @@ extension RecentItem {
     }
 }
 
-let recentItemsVC = ItemsViewController(items: recentItems, cellDescriptor: { $0.cellDescriptor })
+let frame = CGRect(x: 0, y: 0, width: 200, height: 300)
+
+let recentItemsVC = UIViewController()
+recentItemsVC.title = "ViewController"
+let recentItemsTableView = GenericTableViewController(items: recentItems, cellDescriptor: { $0.cellDescriptor })
+recentItemsTableView.frame = frame
+recentItemsVC.view.addSubview(recentItemsTableView)
 
 let nc = UINavigationController(rootViewController: recentItemsVC)
 
-nc.view.frame = CGRect(x: 0, y: 0, width: 200, height: 300)
+nc.view.frame = frame
 PlaygroundPage.current.liveView = nc.view
 
 
+print("💣💣💣💣")
