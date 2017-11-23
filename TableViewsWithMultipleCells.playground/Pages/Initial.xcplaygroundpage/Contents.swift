@@ -30,7 +30,7 @@ typealias GenericTableModel<Item> = [(title: String, items: [Item])]
 // cannot define delegate methods in extensions:
 //     "@objc is not supported within extensions of generic classes" - https://bugs.swift.org/browse/SR-4173
 // so define delegate functions within the body of the class declaration...
-final class GenericTableViewController<Item>: UITableView, UITableViewDataSource, UITableViewDelegate {
+final class GenericTableView<Item>: UITableView, UITableViewDataSource, UITableViewDelegate {
     var items: GenericTableModel<Item> = []
     let cellDescriptor: (Item) -> CellDescriptor
     var didSelect: (Item) -> () = { _ in }
@@ -163,7 +163,7 @@ let frame = CGRect(x: 0, y: 0, width: 400, height: 600)
 
 let recentItemsVC = UIViewController()
 recentItemsVC.title = "ViewController"
-let recentItemsTableView = GenericTableViewController(items: model, cellDescriptor: { $0.cellDescriptor })
+let recentItemsTableView = GenericTableView(items: model, cellDescriptor: { $0.cellDescriptor })
 recentItemsTableView.frame = frame
 recentItemsVC.view.addSubview(recentItemsTableView)
 
