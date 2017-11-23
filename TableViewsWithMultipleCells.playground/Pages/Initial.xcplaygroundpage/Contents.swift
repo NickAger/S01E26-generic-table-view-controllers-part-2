@@ -25,7 +25,7 @@ struct CellDescriptor {
     }
 }
 
-typealias GenericTableModel<Item> = [(title:String,items:[Item])]
+typealias GenericTableModel<Item> = [(title: String, items: [Item])]
 
 // cannot define delegates in extensions:
 // "@objc is not supported within extensions of generic classes" - https://bugs.swift.org/browse/SR-4173
