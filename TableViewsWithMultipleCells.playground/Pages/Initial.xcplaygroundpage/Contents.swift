@@ -172,5 +172,3 @@ let nc = UINavigationController(rootViewController: recentItemsVC)
 nc.view.frame = frame
 PlaygroundPage.current.liveView = nc.view
 
-
-print("💣💣💣💣")
