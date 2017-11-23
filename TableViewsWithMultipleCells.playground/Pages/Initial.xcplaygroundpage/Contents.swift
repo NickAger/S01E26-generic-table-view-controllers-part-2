@@ -13,12 +13,11 @@ struct Artist {
 
 struct CellDescriptor {
     let cellClass: UITableViewCell.Type
-    let reuseIdentifier: String
     let configure: (UITableViewCell) -> ()
+    var reuseIdentifier:String { return String(describing: cellClass) }
     
-    init<Cell: UITableViewCell>(reuseIdentifier: String, configure: @escaping (Cell) -> ()) {
+    init<Cell: UITableViewCell>(configure: @escaping (Cell) -> ()) {
         self.cellClass = Cell.self
-        self.reuseIdentifier = reuseIdentifier
         self.configure = { cell in
             configure(cell as! Cell)
         }
@@ -53,7 +52,6 @@ final class ItemsViewController<Item>: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = items[indexPath.row]
         let descriptor = cellDescriptor(item)
-        
         if !reuseIdentifiers.contains(descriptor.reuseIdentifier) {
             tableView.register(descriptor.cellClass, forCellReuseIdentifier: descriptor.reuseIdentifier)
             reuseIdentifiers.insert(descriptor.reuseIdentifier)
@@ -126,9 +124,9 @@ extension RecentItem {
     var cellDescriptor: CellDescriptor {
         switch self {
         case .artist(let artist):
-            return CellDescriptor(reuseIdentifier: "artist", configure: artist.configureCell)
+            return CellDescriptor(configure: artist.configureCell)
         case .album(let album):
-            return CellDescriptor(reuseIdentifier: "album", configure: album.configureCell)
+            return CellDescriptor(configure: album.configureCell)
         }
     }
 }
