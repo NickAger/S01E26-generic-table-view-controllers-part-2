@@ -27,9 +27,9 @@ struct CellDescriptor {
 
 typealias GenericTableModel<Item> = [(title: String, items: [Item])]
 
-// cannot define delegates in extensions:
-// "@objc is not supported within extensions of generic classes" - https://bugs.swift.org/browse/SR-4173
-// so define delegate functions within the body of the class declaration
+// cannot define delegate methods in extensions:
+//     "@objc is not supported within extensions of generic classes" - https://bugs.swift.org/browse/SR-4173
+// so define delegate functions within the body of the class declaration...
 final class GenericTableViewController<Item>: UITableView, UITableViewDataSource, UITableViewDelegate {
     var items: GenericTableModel<Item> = []
     let cellDescriptor: (Item) -> CellDescriptor
